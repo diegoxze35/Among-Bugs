@@ -1,0 +1,21 @@
+package org.ipn.mx.among.bugs.config;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AmongBugsConfiguration {
+
+
+	@Bean
+	public OpenAPI customOpenAPI() {
+		return new OpenAPI()
+				.info(new Info()
+						.title("Among Bugs API")
+						.version("1.0")
+						.description("Among Bugs API - CRUD operations"));
+
+	}
+}

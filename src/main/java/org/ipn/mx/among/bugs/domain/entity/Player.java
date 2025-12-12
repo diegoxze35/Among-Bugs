@@ -8,16 +8,20 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import jakarta.persistence.Table;
+import java.util.Set;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Table(name = "players")
 @Entity
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
 public class Player {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -28,19 +32,27 @@ public class Player {
 	@Column(nullable = false)
 	private String passwordHash;
 	@OneToMany(
+			targetEntity = Trivia.class,
 			mappedBy = "player",
 			fetch = FetchType.LAZY,
-			/*TODO(Finding out how to remove on cascade based on boolean attribute)*/
-			cascade = {CascadeType.REMOVE}
+			cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH},
+			orphanRemoval = true
 	)
-	private List<Trivia> trivia;
+	private Set<Trivia> trivia; /*This is a set because a player can't have the same Trivia record*/
+
+	@Builder
+	public Player(String username, String email, String passwordHash) {
+		this.username = username;
+		this.email = email;
+		this.passwordHash = passwordHash;
+	}
 }
 
 /*
  * {
- *      "username": "Manue",
+ *      "username": "Manuel",
  *      "email": "Manue2@manue.com",
- *      "password": "manue123",
+ *      "password": "S0m3H45H123",
  *      "trivia": [
  *          { ... }, { ... }
  *      ]
