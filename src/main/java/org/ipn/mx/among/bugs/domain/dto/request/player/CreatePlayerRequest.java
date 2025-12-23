@@ -12,6 +12,6 @@ public record CreatePlayerRequest(
 		@NotNull
 		String email,
 		@NotNull
-		String passwordHash
+		String password
 ) {
 }

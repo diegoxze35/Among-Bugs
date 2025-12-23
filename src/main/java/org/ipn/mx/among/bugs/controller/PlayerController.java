@@ -22,8 +22,8 @@ public class PlayerController {
 
 	private final PlayerService playerService;
 
-	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
 	public PlayerResponse createPlayer(@Valid @RequestBody CreatePlayerRequest request) {
 		return playerService.createPlayer(request);
 	}

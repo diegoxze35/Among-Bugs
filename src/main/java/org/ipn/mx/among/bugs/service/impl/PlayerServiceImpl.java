@@ -39,7 +39,7 @@ public class PlayerServiceImpl implements PlayerService {
 		Player playerToUpdate = playerRepository.findById(playerId).orElseThrow();
 		playerToUpdate.setUsername(newPlayer.username());
 		playerToUpdate.setEmail(newPlayer.email());
-		playerToUpdate.setPasswordHash(newPlayer.passwordHash());
+		playerToUpdate.setPasswordHash(newPlayer.password());
 		Player updated = playerRepository.save(playerToUpdate);
 		return PlayerMapper.toDto(updated);
 	}

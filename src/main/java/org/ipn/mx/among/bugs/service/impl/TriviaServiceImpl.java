@@ -120,7 +120,7 @@ public class TriviaServiceImpl implements TriviaService {
 	@Override
 	@Transactional(readOnly = true)
 	public byte[] createPdfReport(Pageable pageable) {
-		var trivias = this.getAllPublicTrivia(pageable);
+		var allTrivia = this.getAllPublicTrivia(pageable);
 		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
 			Document document = new Document(PageSize.A4);
@@ -138,7 +138,7 @@ public class TriviaServiceImpl implements TriviaService {
 
 			addTableHeader(table);
 
-			for (var t : trivias) {
+			for (var t : allTrivia) {
 				table.addCell(String.valueOf(t.id()));
 				table.addCell(String.valueOf(t.targetScore()));
 				table.addCell(t.title());

@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import java.util.Set;
 
 public record UpdateTriviaRequest(
+		@NotNull
+		Long id,
 		@Size(min = 5, max = 50)
 		@NotNull
 		String title,

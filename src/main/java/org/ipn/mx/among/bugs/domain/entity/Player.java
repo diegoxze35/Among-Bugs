@@ -27,6 +27,8 @@ public class Player {
 	private Long id;
 	@Column(unique = true, nullable = false, length = 25)
 	private String username;
+	@Column(nullable = false)
+	private Boolean isEnabled = false;
 	@Column(unique = true, nullable = false, length = 50)
 	private String email;
 	@Column(nullable = false)
@@ -46,15 +48,5 @@ public class Player {
 		this.email = email;
 		this.passwordHash = passwordHash;
 	}
-}
 
-/*
- * {
- *      "username": "Manuel",
- *      "email": "Manue2@manue.com",
- *      "password": "S0m3H45H123",
- *      "trivia": [
- *          { ... }, { ... }
- *      ]
- * }
- * */
+}
