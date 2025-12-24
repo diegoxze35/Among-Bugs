@@ -9,13 +9,20 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.Set;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Table(name = "players")
+@Table(
+		name = "players",
+		uniqueConstraints = {
+				@UniqueConstraint(name = "uk_players_username", columnNames = "username"),
+				@UniqueConstraint(name = "uk_players_email", columnNames = "email")
+		}
+)
 @Entity
 @Getter
 @Setter
@@ -25,11 +32,11 @@ public class Player {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Column(unique = true, nullable = false, length = 25)
+	@Column(nullable = false, length = 25)
 	private String username;
 	@Column(nullable = false)
 	private Boolean isEnabled = false;
-	@Column(unique = true, nullable = false, length = 50)
+	@Column(nullable = false, length = 50)
 	private String email;
 	@Column(nullable = false)
 	private String passwordHash;

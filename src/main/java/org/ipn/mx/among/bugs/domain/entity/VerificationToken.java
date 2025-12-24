@@ -22,8 +22,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class VerificationToken {
 
-    private static final byte EXPIRATION_TIME_IN_MINUTES = 15;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,10 +36,10 @@ public class VerificationToken {
     private LocalDateTime expiryDate;
 
 	@Builder
-    public VerificationToken(String token, Player player) {
+    public VerificationToken(String token, Player player, byte expiryTimeInMinutes) {
         this.token = token;
         this.player = player;
-        this.expiryDate = LocalDateTime.now().plusMinutes(EXPIRATION_TIME_IN_MINUTES); //It Expires in 15 minutes
+        this.expiryDate = LocalDateTime.now().plusMinutes(expiryTimeInMinutes);
     }
 
 }

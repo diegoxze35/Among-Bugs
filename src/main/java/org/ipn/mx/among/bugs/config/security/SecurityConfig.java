@@ -2,7 +2,9 @@ package org.ipn.mx.among.bugs.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.ipn.mx.among.bugs.service.AuthService;
 import org.ipn.mx.among.bugs.service.JwtService;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,8 +13,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -22,11 +22,8 @@ public class SecurityConfig {
 
 	private final AuthenticationConfiguration authenticationConfiguration;
 	private final JwtService jwtService;
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+	private final MessageSource messageSource;
+	private final AuthService authService;
 
 	@Bean
 	public AuthenticationManager authenticationManager() throws Exception {
@@ -45,7 +42,9 @@ public class SecurityConfig {
 				.addFilter(new JwtAuthenticationFilter(
 								authenticationManager(),
 								new ObjectMapper(),
-								jwtService
+								jwtService,
+								messageSource,
+								authService
 						)
 				)
 				.addFilter(new JwtValidationFilter(

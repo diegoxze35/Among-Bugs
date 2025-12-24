@@ -19,9 +19,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.stereotype.Component;
+import static org.ipn.mx.among.bugs.service.JwtService.HEADER_STRING;
+import static org.ipn.mx.among.bugs.service.JwtService.TOKEN_PREFIX;
 
-@Component
 public class JwtValidationFilter extends BasicAuthenticationFilter {
 
 	private final JwtService jwtService;
@@ -46,9 +46,9 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 			@NonNull FilterChain filterChain
 	) throws ServletException, IOException {
 
-		final String authHeader = request.getHeader("Authorization");
+		final String authHeader = request.getHeader(HEADER_STRING);
 
-		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+		if (authHeader == null || !authHeader.startsWith(TOKEN_PREFIX)) {
 			filterChain.doFilter(request, response);
 			return;
 		}

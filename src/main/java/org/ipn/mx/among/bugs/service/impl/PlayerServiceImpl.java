@@ -19,7 +19,7 @@ public class PlayerServiceImpl implements PlayerService {
 	private final PlayerRepository playerRepository;
 	private final JavaMailSender mailSender;
 
-	@Override
+	/*@Override
 	@Transactional(rollbackFor = Exception.class)
 	public PlayerResponse createPlayer(CreatePlayerRequest player) {
 		Player playerEntity = PlayerMapper.toEntity(player);
@@ -37,7 +37,7 @@ public class PlayerServiceImpl implements PlayerService {
 	@Transactional(rollbackFor = Exception.class)
 	public PlayerResponse updateProfile(CreatePlayerRequest newPlayer, Long playerId) {
 		Player playerToUpdate = playerRepository.findById(playerId).orElseThrow();
-		playerToUpdate.setUsername(newPlayer.username());
+		playerToUpdate.setUsername(newPlayer.email());
 		playerToUpdate.setEmail(newPlayer.email());
 		playerToUpdate.setPasswordHash(newPlayer.password());
 		Player updated = playerRepository.save(playerToUpdate);
@@ -48,6 +48,6 @@ public class PlayerServiceImpl implements PlayerService {
 	@Transactional(rollbackFor = Exception.class)
 	public void deletePlayer(Long playerId) {
 		playerRepository.deleteById(playerId);
-	}
+	}*/
 
 }

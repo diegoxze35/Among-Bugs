@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PlayerController {
 
-	private final PlayerService playerService;
+	/*private final PlayerService playerService;
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
@@ -37,6 +37,6 @@ public class PlayerController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deletePlayer(@PathVariable Long playerId) {
 		playerService.deletePlayer(playerId);
-	}
+	}*/
 
 }
