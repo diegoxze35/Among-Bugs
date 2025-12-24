@@ -59,7 +59,7 @@ que está en el paquete org.ipn.mx.among.bugs.controller hay un comentario impor
 
 Endpoint para que el jugador inicie sesión una vez que haya verificado su correo.
 
-* **URL:** `/login`
+* **URL:** `auth/login`
 * **Método:** `POST`
 * **Autenticación Requerida:** No
 **Response**: Redirige a una URL, debe de redirigir a una URL del frontend
@@ -67,20 +67,26 @@ Endpoint para que el jugador inicie sesión una vez que haya verificado su corre
 **Body (Request):**
 ```json
 {
-  "username": "diegoalv1217@gmail.com",
+  "email": "diegoalv1217@gmail.com",
   "password": "TheDiesgo'sPassword"
 }
 ```
 **Body (Response)**
 
-**Si el usuario aún no ha verificado su correo**
+**Si el usuario aún no ha verificado su correo y su token no ha expirado**
 ```json
 {
-    "error": "User is disabled"
+    "message": "No has verificado tu cuenta, por favor verifica tu cuenta haciendo clic en el enlace de tu correo electrónico"
 }
 ```
-**Si el usuario ya verificó su correo electrónico**
+**Si el usuario aún no ha verificado su correo y su token ha expirado**
+```json
+{
+    "message": "No verificaste tu cuenta haciendo clic en el enlace que te hemos enviado, te hemos enviado otro correo electrónico"
+}
+```
 
+**Si el usuario ya verificó su correo electrónico**
 La funcionalidad del token de refresco está en construcción
 ```json
 {
