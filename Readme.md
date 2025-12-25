@@ -351,4 +351,5 @@ Genera un PDF de todos los juegos de trivia de un jugador.
 * **Autenticación Requerida:** Sí
 
 **Response (application/pdf)**
+<img width="924" height="640" alt="image" src="https://github.com/user-attachments/assets/9bf0fd3f-7807-4cce-9114-166b10483f22" />
 
