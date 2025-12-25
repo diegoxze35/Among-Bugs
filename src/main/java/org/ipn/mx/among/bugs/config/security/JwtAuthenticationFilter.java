@@ -87,7 +87,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		final String playerUsername = playerData[1];
 		Claims claims = Jwts
 				.claims()
-				.add("email", playerUsername)
+				.add("newEmail", playerUsername)
 				.add("roles", objectMapper.writeValueAsString(roles))
 				.build();
 		final String token = jwtService.generateToken(claims, playerId);

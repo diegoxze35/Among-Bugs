@@ -2,6 +2,8 @@ package org.ipn.mx.among.bugs.mapper;
 
 import org.ipn.mx.among.bugs.domain.dto.request.trivia.CreateTriviaRequest;
 import org.ipn.mx.among.bugs.domain.dto.request.trivia.QuestionRequest;
+import org.ipn.mx.among.bugs.domain.dto.request.trivia.UpdateQuestionRequest;
+import org.ipn.mx.among.bugs.domain.dto.request.trivia.UpdateTriviaRequest;
 import org.ipn.mx.among.bugs.domain.dto.response.trivia.QuestionOptionResponse;
 import org.ipn.mx.among.bugs.domain.dto.response.trivia.QuestionResponse;
 import org.ipn.mx.among.bugs.domain.dto.response.trivia.TriviaResponse;
@@ -12,6 +14,25 @@ import org.ipn.mx.among.bugs.domain.entity.Trivia;
 import org.ipn.mx.among.bugs.domain.entity.json.QuestionOption;
 
 public class TriviaMapper {
+
+	public static Trivia toTriviaEntity(CreateTriviaRequest request, Player player) {
+		return Trivia.builder()
+				.player(player)
+				.targetScore(request.targetScore())
+				.description(request.description())
+				.isPublic(request.isPublic())
+				.title(request.title())
+				.build();
+	}
+
+	public static Question toQuestionEntity(QuestionRequest request) {
+		return Question.builder()
+				.questionText(request.questionText())
+				.options(request.options().stream().map(o ->
+						new QuestionOption(o.text(), o.isCorrect())
+				).toList())
+				.build();
+	}
 
 	public static TriviaResponse toSimpleDto(Trivia trivia) {
 		return new TriviaResponse(
@@ -34,6 +55,29 @@ public class TriviaMapper {
 		);
 	}
 
+	public static void updateTriviaFromDto(Trivia trivia, UpdateTriviaRequest request) {
+		trivia.setTitle(request.title());
+		trivia.setDescription(request.description());
+		trivia.setTargetScore(request.targetScore());
+		trivia.setIsPublic(request.isPublic());
+	}
+
+	public static Question createQuestionFromDto(UpdateQuestionRequest request) {
+		return Question.builder()
+				.questionText(request.questionText())
+				.options(request.options().stream()
+						.map(o -> new QuestionOption(o.text(), o.isCorrect()))
+						.toList())
+				.build();
+	}
+
+	public static void updateQuestionFromDto(Question question, UpdateQuestionRequest request) {
+		question.setQuestionText(request.questionText());
+		question.setOptions(request.options().stream()
+				.map(o -> new QuestionOption(o.text(), o.isCorrect()))
+				.toList());
+	}
+
 	private static QuestionResponse toQuestionDto(Question question) {
 		return new QuestionResponse(
 				question.getId(),
@@ -44,25 +88,6 @@ public class TriviaMapper {
 
 	private static QuestionOptionResponse toOptionsDto(QuestionOption option) {
 		return new QuestionOptionResponse(option.getText(), option.getIsCorrect());
-	}
-
-	public static Question toQuestionEntity(QuestionRequest request) {
-		return Question.builder()
-				.questionText(request.questionText())
-				.options(request.options().stream().map(o ->
-						new QuestionOption(o.text(), o.isCorrect())
-				).toList())
-				.build();
-	}
-
-	public static Trivia toTriviaEntity(CreateTriviaRequest request, Player player) {
-		return Trivia.builder()
-				.player(player)
-				.targetScore(request.targetScore())
-				.description(request.description())
-				.isPublic(request.isPublic())
-				.title(request.title())
-				.build();
 	}
 
 }

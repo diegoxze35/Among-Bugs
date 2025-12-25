@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
-import org.ipn.mx.among.bugs.domain.entity.proyection.PlayerCredentials;
+import org.ipn.mx.among.bugs.domain.entity.proyection.PlayerAuthData;
 import org.ipn.mx.among.bugs.repository.player.PlayerRepository;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -25,16 +25,16 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		PlayerCredentials playerCredentials = playerRepository.findByEmail(username).orElseThrow(() -> {
+		PlayerAuthData playerAuthData = playerRepository.findByEmail(username).orElseThrow(() -> {
 			Locale locale = LocaleContextHolder.getLocale();
 			final String message = messageSource.getMessage("auth.login.not.found", null, locale);
 			return new UsernameNotFoundException(message);
 		});
 		List<GrantedAuthority> roles = Collections.singletonList(new SimpleGrantedAuthority("ROLE_PLAYER"));
 		return new User(
-				joinPlayerData(playerCredentials),
-				playerCredentials.getPasswordHash(),
-				playerCredentials.getIsEnabled(),
+				joinPlayerData(playerAuthData),
+				playerAuthData.getPasswordHash(),
+				playerAuthData.getIsEnabled(),
 				true,
 				true,
 				true,
@@ -42,7 +42,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
 		);
 	}
 
-	private String joinPlayerData(PlayerCredentials p) {
+	private String joinPlayerData(PlayerAuthData p) {
 		return p.getId().toString() + ',' + p.getUsername();
 	}
 

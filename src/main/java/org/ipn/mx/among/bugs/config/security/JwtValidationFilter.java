@@ -55,7 +55,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
 		final String jwt = authHeader.substring(7);
 		Claims claims = jwtService.extractAllClaims(jwt);
-		final long userId = Long.parseLong(claims.getSubject());
+		final long playerId = Long.parseLong(claims.getSubject());
 		Object authorities = claims.get("roles");
 		Collection<? extends GrantedAuthority> roles = Arrays.asList(
 				objectMapper
@@ -63,7 +63,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 						.readValue(authorities.toString().getBytes(), SimpleGrantedAuthority[].class)
 		);
 		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-				userId, null, roles
+				playerId, null, roles
 		);
 		SecurityContextHolder.getContext().setAuthentication(authToken);
 		filterChain.doFilter(request, response);

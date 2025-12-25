@@ -1,6 +1,6 @@
 package org.ipn.mx.among.bugs.domain.entity.proyection;
 
-public interface PlayerCredentials {
+public interface PlayerAuthData {
 	Long getId();
 	String getUsername();
 	String getPasswordHash();

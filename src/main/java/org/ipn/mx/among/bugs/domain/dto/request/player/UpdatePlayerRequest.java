@@ -1,18 +1,15 @@
 package org.ipn.mx.among.bugs.domain.dto.request.player;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record CreatePlayerRequest(
+/*Same as CreatePlayerRequest, but these fields can be null*/
+public record UpdatePlayerRequest(
 		@Size(min = 5, max = 25)
-		@NotNull
-		String username,
+		String newUsername,
 		@Email
-		@NotNull
-		String email,
+		String newEmail,
 		@Size(min = 8)
-		@NotNull
-		String password
+		String newPassword
 ) {
 }

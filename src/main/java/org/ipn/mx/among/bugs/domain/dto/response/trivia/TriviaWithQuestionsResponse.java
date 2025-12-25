@@ -8,6 +8,6 @@ public record TriviaWithQuestionsResponse(
 		String title,
 		String description,
 		Boolean isPublic,
-		List<QuestionResponse> options
+		List<QuestionResponse> questions
 ) {
 }

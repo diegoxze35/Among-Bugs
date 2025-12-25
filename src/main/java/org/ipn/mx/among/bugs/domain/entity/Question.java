@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.util.List;
 import lombok.Builder;
@@ -70,9 +69,19 @@ public class Question {
 		this.options = options;
 	}
 
-	@PrePersist
-	public void setFormat() {
-		this.questionText = questionText.trim().replace(' ', '_').toUpperCase();
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Question other)) return false;
+		return id != null && id.equals(other.getId());
+	}
+
+	@Override
+	public int hashCode() {
+		// Retornar una constante asegura que el objeto no "salte" de bucket en el HashSet
+		// cuando se guarda en BD y se genera el ID.
+		// El rendimiento baja un poco en sets muy grandes, pero garantiza consistencia.
+		return getClass().hashCode();
 	}
 
 }

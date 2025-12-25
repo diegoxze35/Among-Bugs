@@ -1,7 +1,8 @@
 package org.ipn.mx.among.bugs.domain.dto.response.player;
 
-public record PlayerResponse(
+public record UpdatedPlayerResponse(
 		String username,
-		String email
+		String email,
+		boolean passwordUpdated
 ) {
 }

@@ -2,13 +2,15 @@ package org.ipn.mx.among.bugs.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.ipn.mx.among.bugs.domain.dto.request.player.CreatePlayerRequest;
+import org.ipn.mx.among.bugs.domain.dto.request.player.UpdatePlayerRequest;
 import org.ipn.mx.among.bugs.domain.dto.response.player.PlayerResponse;
+import org.ipn.mx.among.bugs.domain.dto.response.player.UpdatedPlayerResponse;
 import org.ipn.mx.among.bugs.service.PlayerService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,23 +22,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PlayerController {
 
-	/*private final PlayerService playerService;
+	private final PlayerService playerService;
 
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public PlayerResponse createPlayer(@Valid @RequestBody CreatePlayerRequest request) {
-		return playerService.createPlayer(request);
+	@GetMapping
+	public ResponseEntity<PlayerResponse> getPlayerProfile(@AuthenticationPrincipal Long playerId) {
+		PlayerResponse player = playerService.getPlayerProfile(playerId);
+		return ResponseEntity.ok(player);
 	}
 
-	@PutMapping(value = "/{playerId}")
-	public PlayerResponse updateProfile(@Valid @RequestBody CreatePlayerRequest request, @PathVariable Long playerId) {
-		return playerService.updateProfile(request, playerId);
+	@PutMapping
+	public ResponseEntity<UpdatedPlayerResponse> updateProfile(
+			@AuthenticationPrincipal Long playerId,
+			@Valid @RequestBody UpdatePlayerRequest request
+	) {
+		UpdatedPlayerResponse player = playerService.updateProfile(request, playerId);
+		return ResponseEntity.ok(player);
 	}
 
-	@DeleteMapping( value = "/{playerId}")
+	@DeleteMapping
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deletePlayer(@PathVariable Long playerId) {
+	public void deletePlayer(@AuthenticationPrincipal Long playerId) {
 		playerService.deletePlayer(playerId);
-	}*/
+	}
 
 }
