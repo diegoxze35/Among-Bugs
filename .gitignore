@@ -31,3 +31,27 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Angular ###
+frontend/**/node_modules/
+frontend/**/.angular/
+frontend/**/dist/
+frontend/**/.vscode/
+
+### Sistema ###
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.temp
+
+### Variables de entorno ###
+.env
+.env.local
+.env.*.local
+
+### Archivos de compilación ###
+*.class
+*.jar
+*.war
+*.ear
