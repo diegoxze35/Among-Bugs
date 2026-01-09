@@ -1,0 +1,50 @@
+package org.ipn.mx.among.bugs.service.impl;
+
+import lombok.RequiredArgsConstructor;
+import org.ipn.mx.among.bugs.domain.entity.proyection.PlayerAuthData;
+import org.ipn.mx.among.bugs.repository.player.PlayerRepository;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+
+@Service
+@RequiredArgsConstructor
+public class UserDetailServiceImpl implements UserDetailsService {
+
+	private final PlayerRepository playerRepository;
+	private final MessageSource messageSource;
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		PlayerAuthData playerAuthData = playerRepository.findByEmail(username).orElseThrow(() -> {
+			Locale locale = LocaleContextHolder.getLocale();
+			final String message = messageSource.getMessage("auth.login.not.found", null, locale);
+			return new UsernameNotFoundException(message);
+		});
+		List<GrantedAuthority> roles = Collections.singletonList(new SimpleGrantedAuthority("ROLE_PLAYER"));
+		return new User(
+				joinPlayerData(playerAuthData),
+				playerAuthData.getPasswordHash(),
+				playerAuthData.getIsEnabled(),
+				true,
+				true,
+				true,
+				roles
+		);
+	}
+
+	private String joinPlayerData(PlayerAuthData p) {
+		return p.getId().toString() + ',' + p.getUsername();
+	}
+
+}

@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: among_bugs_db
+    environment:
+      POSTGRES_DB: among_bugs
+      POSTGRES_USER: among
+      POSTGRES_PASSWORD: among
+    ports:
+      - "8020:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

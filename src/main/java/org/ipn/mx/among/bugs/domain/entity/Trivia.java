@@ -1,29 +1,36 @@
 package org.ipn.mx.among.bugs.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
+@Table(name = "trivia")
 @Entity
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Builder
 public class Trivia {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "creator_player_id") //Columna de llave foranea
+	@ManyToOne(
+			targetEntity = Player.class,
+			fetch = FetchType.LAZY,
+			optional = false
+	)
+	@JoinColumn(
+			name = "creator_player_id",
+			referencedColumnName = "id",
+			nullable = false
+	)
 	private Player player;
-
-	@Column(nullable = false)
-	private Integer scoreTarget;
 
 	@Column(nullable = false, length = 50)
 	private String title;
@@ -31,34 +38,40 @@ public class Trivia {
 	@Column(length = 200)
 	private String description;
 
-    //Esto por que yo quiero (por ahora)
-	@Column(nullable = false, columnDefinition = "boolean default false")
-	protected Boolean isPublic; //Esta cosa es para indicar si es publico o privado xd
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+	protected Boolean isPublic;
 
-	@Lob
-	@Column(columnDefinition = "LONGBLOB")
-	private byte[] coverImage; //La imagen de la trivia
+	@OneToMany(
+			targetEntity = Question.class,
+			mappedBy = "trivia",
+			fetch = FetchType.LAZY,
+			cascade = {CascadeType.ALL},
+			orphanRemoval = true
+	)
+	private Set<Question> questions;
 
-    @OneToMany(
-            mappedBy = "trivia",
-            fetch = FetchType.LAZY,
-            cascade = {CascadeType.REMOVE}
-    )
-    private List<Rating> ratings;
+	@Builder
+	public Trivia(
+			Player player,
+			String title,
+			String description,
+			boolean isPublic
+	) {
+		this.player = player;
+		this.title = title;
+		this.description = description;
+		this.isPublic = isPublic;
+		this.questions = new HashSet<>();
+	}
 
-    @OneToOne(
-            mappedBy = "trivia",
-            fetch = FetchType.LAZY,
-            cascade = {CascadeType.REMOVE}
-    )
-    private Game game;
+	public void addQuestion(Question question) {
+        questions.add(question);
+        question.setTrivia(this);
+    }
 
-    //Relacion de muchos a muchos entre trivia y question
-    @ManyToMany
-    @JoinTable(
-            name = "trivia_question",
-            joinColumns = @JoinColumn(name = "trivia_id"),
-            inverseJoinColumns = @JoinColumn(name="question_id")
-    )
-    private List<Question> questions;
+    public void removeQuestion(Question question) {
+        questions.remove(question);
+        question.setTrivia(null);
+    }
+
 }
