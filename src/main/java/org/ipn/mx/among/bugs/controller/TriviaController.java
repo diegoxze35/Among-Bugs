@@ -73,7 +73,7 @@ public class TriviaController {
 		try {
 			final byte[] pdfBytes = pdfTriviaService.generatePlayerStatsReport(playerId);
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
-			final String fileName = "estadisticas_" + LocalDateTime.now().format(formatter) + ".pdf";
+			final String fileName = "statistic_" + LocalDateTime.now().format(formatter) + ".pdf";
 			return ResponseEntity
 					.ok()
 					.contentType(MediaType.APPLICATION_PDF)

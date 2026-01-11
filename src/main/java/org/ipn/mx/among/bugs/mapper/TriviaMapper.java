@@ -15,6 +15,8 @@ import org.ipn.mx.among.bugs.domain.entity.json.QuestionOption;
 
 public class TriviaMapper {
 
+	private TriviaMapper() {}
+
 	public static Trivia toTriviaEntity(CreateTriviaRequest request, Player player) {
 		return Trivia.builder()
 				.player(player)

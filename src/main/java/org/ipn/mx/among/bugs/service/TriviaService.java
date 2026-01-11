@@ -19,8 +19,6 @@ public interface TriviaService {
 	TriviaWithQuestionsResponse createTrivia(Long playerId, CreateTriviaRequest request);
 	TriviaWithQuestionsResponse updateTrivia(UpdateTriviaRequest request);
 	void deleteTrivia(Long triviaId);
-
-	// Nuevos métodos para manejar intentos y rankings
 	TriviaAttemptResponse submitAttempt(Long playerId, SubmitTriviaAttemptRequest request);
 	TriviaRankingResponse getTriviaRankings(Long triviaId);
 }

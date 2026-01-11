@@ -10,7 +10,7 @@ public interface TriviaRepository extends JpaRepository<Trivia, Long> {
 
 	Set<Trivia> findAllByPlayerId(Long playerId);
 
-	@EntityGraph(attributePaths = {"player", "questions"})
+	//@EntityGraph(attributePaths = {"player", "questions"}) ?????
 	Set<Trivia> findAllByIsPublicTrue();
 
 }

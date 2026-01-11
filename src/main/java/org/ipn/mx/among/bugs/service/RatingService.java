@@ -9,7 +9,7 @@ public interface RatingService {
     /**
      * Crear o actualizar un rating para una trivia
      */
-    RatingResponse rateTrivia(Long triviaId, RatingRequest request, Long playerId);
+    RatingResponse rateTrivia(RatingRequest request, Long playerId);
 
     /**
      * Obtener todos los ratings de una trivia

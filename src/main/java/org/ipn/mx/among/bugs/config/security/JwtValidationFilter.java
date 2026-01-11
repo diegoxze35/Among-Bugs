@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,38 +57,25 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 		}
 
 		final String jwt = authHeader.substring(7);
-
-		// Validar que el token no esté vacío y tenga el formato correcto
-		if (jwt.isEmpty() || jwt.isBlank()) {
-			filterChain.doFilter(request, response);
-			return;
-		}
-
-		// Validar que el token tenga el formato JWT correcto (debe tener exactamente 2 puntos)
-		long periodCount = jwt.chars().filter(ch -> ch == '.').count();
-		if (periodCount != 2) {
-			filterChain.doFilter(request, response);
-			return;
-		}
-
+		Claims claims;
 		try {
-			Claims claims = jwtService.extractAllClaims(jwt);
-			final long playerId = Long.parseLong(claims.getSubject());
-			Object authorities = claims.get("roles");
-			Collection<? extends GrantedAuthority> roles = Arrays.asList(
-					objectMapper
-							.addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
-							.readValue(authorities.toString().getBytes(), SimpleGrantedAuthority[].class)
-			);
-			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-					playerId, null, roles
-			);
-			SecurityContextHolder.getContext().setAuthentication(authToken);
-		} catch (Exception e) {
-			// Si hay cualquier error al parsear el token, simplemente continuar sin autenticar
-			// El usuario será redirigido por Spring Security si intenta acceder a un recurso protegido
+			claims = jwtService.extractAllClaims(jwt);
+		} catch (JwtException e) {
+			SecurityContextHolder.clearContext();
+			filterChain.doFilter(request, response);
+			return;
 		}
-
+		final long playerId = Long.parseLong(claims.getSubject());
+		Object authorities = claims.get("roles");
+		Collection<? extends GrantedAuthority> roles = Arrays.asList(
+				objectMapper
+						.addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
+						.readValue(authorities.toString().getBytes(), SimpleGrantedAuthority[].class)
+		);
+		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+				playerId, null, roles
+		);
+		SecurityContextHolder.getContext().setAuthentication(authToken);
 		filterChain.doFilter(request, response);
 	}
 }

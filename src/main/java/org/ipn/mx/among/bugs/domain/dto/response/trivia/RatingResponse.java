@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
  */
 public record RatingResponse(
         Long id,
-        Long playerId,
         String playerUsername,
         Short score,
         String comment,

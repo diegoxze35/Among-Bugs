@@ -1,12 +1,20 @@
 package org.ipn.mx.among.bugs.domain.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Table(name = "trivia_attempts")
 @Entity
@@ -53,6 +61,7 @@ public class TriviaAttempt {
 	private Long completionTimeSeconds; // Tiempo total en segundos que tardó en completar
 
 	@Column(nullable = false)
+	@CreationTimestamp
 	private LocalDateTime attemptDate; // Fecha y hora del intento
 
 	@Builder
@@ -61,15 +70,15 @@ public class TriviaAttempt {
 			Trivia trivia,
 			Integer correctAnswers,
 			Integer totalQuestions,
-			Long completionTimeSeconds,
-			LocalDateTime attemptDate
+			Long completionTimeSeconds
+			//LocalDateTime attemptDate -> Not necessary
 	) {
 		this.player = player;
 		this.trivia = trivia;
 		this.correctAnswers = correctAnswers;
 		this.totalQuestions = totalQuestions;
 		this.completionTimeSeconds = completionTimeSeconds;
-		this.attemptDate = attemptDate != null ? attemptDate : LocalDateTime.now();
+		//this.attemptDate = attemptDate != null ? attemptDate : LocalDateTime.now();
 	}
 
 	@Override

@@ -1,13 +1,13 @@
-package org.ipn.mx.among.bugs.repository.trivia;
-
-import org.ipn.mx.among.bugs.domain.entity.Rating;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+package org.ipn.mx.among.bugs.repository.rating;
 
 import java.util.List;
 import java.util.Optional;
+import org.ipn.mx.among.bugs.domain.entity.Rating;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RatingRepository extends JpaRepository<Rating, Long> {
@@ -37,5 +37,8 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
      * Contar cuántas calificaciones tiene una trivia
      */
     long countByTriviaId(Long triviaId);
-}
 
+    @Modifying
+    @Query("DELETE FROM Rating r WHERE r.id = :id AND r.player.id = :playerId")
+    void deleteByIdAndPlayerId(@Param("id") Long id, @Param("playerId") Long playerId);
+}

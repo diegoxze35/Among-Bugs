@@ -8,11 +8,12 @@ import jakarta.validation.constraints.NotNull;
  * Request para crear o actualizar un rating
  */
 public record RatingRequest(
-        @NotNull(message = "La calificación es obligatoria")
-        @Min(value = 1, message = "La calificación mínima es 1 estrella")
-        @Max(value = 5, message = "La calificación máxima es 5 estrellas")
+        @NotNull
+        Long triviaId,
+        @NotNull
+        @Min(value = 1)
+        @Max(value = 5)
         Short score,
-
         String comment // Opcional
 ) {
 }

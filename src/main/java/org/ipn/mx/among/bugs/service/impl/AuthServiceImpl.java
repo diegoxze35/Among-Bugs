@@ -33,13 +33,15 @@ public class AuthServiceImpl implements AuthService {
 	@Value("${domain.base.url}")
 	private String baseUrl;
 	@Value("${security.verify.expiration-time-minutes}")
-	private byte expirationTime;
+	private byte expirationTimeInMinutes;
 
 	private final PlayerRepository playerRepository;
 	private final MessageSource messageSource;
 	private final VerificationTokenRepository verificationTokenRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final EmailSenderService emailSenderService;
+
+	private static final String VERIFICATION_ROUTE = "/api/auth/verify";
 
 	@Transactional
 	@Override
@@ -50,12 +52,12 @@ public class AuthServiceImpl implements AuthService {
 		VerificationToken verificationToken = VerificationToken.builder()
 				.token(emailVerificationToken)
 				.player(savedPlayer)
-				.expiryTimeInMinutes(expirationTime)
+				.expiryTimeInMinutes(expirationTimeInMinutes)
 				.build();
 		verificationTokenRepository.save(verificationToken);
 		final String savedEmail = savedPlayer.getEmail();
 		final String savedUsername = savedPlayer.getUsername();
-		final String verificationUrl = baseUrl + "/api/auth/verify?token=" + emailVerificationToken;
+		final String verificationUrl = baseUrl + VERIFICATION_ROUTE + "?token=" + emailVerificationToken;
 		Locale locale = LocaleContextHolder.getLocale();
 		emailSenderService.sendVerificationEmail(savedEmail, savedUsername, locale, verificationUrl);
 		final Object[] args = Collections.singletonList(savedEmail).toArray();
@@ -88,9 +90,9 @@ public class AuthServiceImpl implements AuthService {
 			final String playerUsername = verificationData.getUsername();
 			final String emailVerificationToken = UUID.randomUUID().toString();
 			verificationTokenRepository.updateVerificationTokenByPlayerEmail(
-					emailVerificationToken, LocalDateTime.now().plusMinutes(15), playerEmail
+					emailVerificationToken, LocalDateTime.now().plusMinutes(expirationTimeInMinutes), playerEmail
 			);
-			final String verificationUrl = baseUrl + "/api/auth/verify?token=" + emailVerificationToken;
+			final String verificationUrl = baseUrl + VERIFICATION_ROUTE + "?token=" + emailVerificationToken;
 			emailSenderService.sendVerificationEmail(playerEmail, playerUsername, locale, verificationUrl);
 			return true;
 		} else {

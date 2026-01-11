@@ -1,5 +1,12 @@
 package org.ipn.mx.among.bugs.service.impl;
 
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.ipn.mx.among.bugs.domain.dto.request.trivia.CreateTriviaRequest;
 import org.ipn.mx.among.bugs.domain.dto.request.trivia.SubmitTriviaAttemptRequest;
@@ -13,21 +20,18 @@ import org.ipn.mx.among.bugs.domain.entity.Player;
 import org.ipn.mx.among.bugs.domain.entity.Question;
 import org.ipn.mx.among.bugs.domain.entity.Trivia;
 import org.ipn.mx.among.bugs.domain.entity.TriviaAttempt;
+import org.ipn.mx.among.bugs.exception.ResourceNotFoundException;
+import org.ipn.mx.among.bugs.mapper.TriviaAttemptMapper;
 import org.ipn.mx.among.bugs.mapper.TriviaMapper;
 import org.ipn.mx.among.bugs.repository.player.PlayerRepository;
 import org.ipn.mx.among.bugs.repository.trivia.TriviaAttemptRepository;
 import org.ipn.mx.among.bugs.repository.trivia.TriviaRepository;
 import org.ipn.mx.among.bugs.service.TriviaService;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,7 @@ public class TriviaServiceImpl implements TriviaService {
 	private final TriviaRepository triviaRepository;
 	private final PlayerRepository playerRepository;
 	private final TriviaAttemptRepository triviaAttemptRepository;
+	private final MessageSource messageSource;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -61,8 +66,11 @@ public class TriviaServiceImpl implements TriviaService {
 	@Override
 	@Transactional(readOnly = true)
 	public TriviaWithQuestionsResponse getTriviaWithQuestions(Long triviaId) {
-		Trivia trivia = triviaRepository.findById(triviaId)
-			.orElseThrow(() -> new RuntimeException("Trivia no encontrada"));
+		Trivia trivia = triviaRepository.findById(triviaId).orElseThrow(() -> {
+			Locale locale = LocaleContextHolder.getLocale();
+			final String message = messageSource.getMessage("trivia.not.found", null, locale);
+			return new ResourceNotFoundException(message);
+		});
 		return TriviaMapper.toDtoWithQuestions(trivia);
 	}
 
@@ -92,128 +100,68 @@ public class TriviaServiceImpl implements TriviaService {
 		triviaRepository.deleteById(triviaId);
 	}
 
+	/*I refactored this method to not "overquerying" the database -> Diego*/
 	@Override
 	@Transactional
 	public TriviaAttemptResponse submitAttempt(Long playerId, SubmitTriviaAttemptRequest request) {
-		Player player = playerRepository.findById(playerId)
-			.orElseThrow(() -> new RuntimeException("Jugador no encontrado"));
-
-		Trivia trivia = triviaRepository.findById(request.triviaId())
-			.orElseThrow(() -> new RuntimeException("Trivia no encontrada"));
-
-		// Buscar el mejor intento anterior del jugador para esta trivia
-		TriviaAttempt previousBest = triviaAttemptRepository
-			.findTopByPlayerIdAndTriviaIdOrderByCorrectAnswersDescCompletionTimeSecondsAsc(
-				playerId,
-				request.triviaId()
-			)
-			.orElse(null);
-
-		// Decidir si guardar el nuevo intento
-		boolean shouldSave = false;
-
-		if (previousBest == null) {
-			// Primera vez que juega esta trivia, siempre se guarda
-			shouldSave = true;
+		if (!triviaRepository.existsById(request.triviaId())) {
+			Locale locale = LocaleContextHolder.getLocale();
+			final String message = messageSource.getMessage("trivia.not.found", null, locale);
+			throw new ResourceNotFoundException(message);
+		}
+		Player playerRef = playerRepository.getReferenceById(playerId); // Lazy fetching
+		Trivia triviaRef = triviaRepository.getReferenceById(request.triviaId()); // Lazy fetching
+		Optional<TriviaAttempt> previousBestOptional = triviaAttemptRepository.findTopByPlayerIdAndTriviaId(playerId, request.triviaId());
+		if (previousBestOptional.isEmpty()) {
+			TriviaAttempt newAttempt = TriviaAttemptMapper.toEntity(request, playerRef, triviaRef);
+			return TriviaAttemptMapper.toDto(triviaAttemptRepository.save(newAttempt));
 		} else {
-			// Ya tiene un registro anterior
+			TriviaAttempt previousBest = previousBestOptional.get();
 			int newCorrectAnswers = request.correctAnswers();
 			int oldCorrectAnswers = previousBest.getCorrectAnswers();
 			long newTime = request.completionTimeSeconds();
 			long oldTime = previousBest.getCompletionTimeSeconds();
-
-			// Solo guardar si:
-			// 1. Tiene más o igual número de aciertos Y menos tiempo (mejor tiempo)
-			// 2. Tiene más aciertos (incluso si el tiempo es peor)
-			if (newCorrectAnswers > oldCorrectAnswers) {
-				// Tiene más aciertos, siempre se guarda
-				shouldSave = true;
-			} else if (newCorrectAnswers == oldCorrectAnswers && newTime < oldTime) {
-				// Mismo número de aciertos pero mejor tiempo (menor)
-				shouldSave = true;
+			if (newCorrectAnswers > oldCorrectAnswers || (newCorrectAnswers == oldCorrectAnswers && newTime < oldTime)) {
+				previousBest.setCorrectAnswers(newCorrectAnswers);
+				previousBest.setCompletionTimeSeconds(newTime);
+				return TriviaAttemptMapper.toDto(triviaAttemptRepository.save(previousBest));
 			}
+			return TriviaAttemptMapper.toDto(previousBest);
 		}
-
-		TriviaAttempt saved = null;
-
-		if (shouldSave) {
-			// Eliminar el intento anterior si existe (para mantener solo el mejor)
-			if (previousBest != null) {
-				triviaAttemptRepository.delete(previousBest);
-			}
-
-			// Guardar el nuevo intento
-			TriviaAttempt attempt = TriviaAttempt.builder()
-				.player(player)
-				.trivia(trivia)
-				.correctAnswers(request.correctAnswers())
-				.totalQuestions(request.totalQuestions())
-				.completionTimeSeconds(request.completionTimeSeconds())
-				.attemptDate(LocalDateTime.now())
-				.build();
-
-			saved = triviaAttemptRepository.save(attempt);
-		} else {
-			// No se guardó porque no superó el récord anterior
-			saved = previousBest;
-		}
-
-		return new TriviaAttemptResponse(
-			saved.getId(),
-			player.getUsername(),
-			player.getId(),
-			saved.getCorrectAnswers(),
-			saved.getTotalQuestions(),
-			saved.getCompletionTimeSeconds(),
-			saved.getAttemptDate()
-		);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public TriviaRankingResponse getTriviaRankings(Long triviaId) {
-		Trivia trivia = triviaRepository.findById(triviaId)
-			.orElseThrow(() -> new RuntimeException("Trivia no encontrada"));
-
+		Trivia trivia = triviaRepository.findById(triviaId).orElseThrow(() -> {
+			Locale locale = LocaleContextHolder.getLocale();
+			final String message = messageSource.getMessage("trivia.not.found", null, locale);
+			return new ResourceNotFoundException(message);
+		});
 		List<TriviaAttempt> attempts = triviaAttemptRepository.findTopAttemptsByTriviaId(triviaId);
-
-		List<TriviaAttemptResponse> rankings = attempts.stream()
-			.map(attempt -> new TriviaAttemptResponse(
-				attempt.getId(),
-				attempt.getPlayer().getUsername(),
-				attempt.getPlayer().getId(),
-				attempt.getCorrectAnswers(),
-				attempt.getTotalQuestions(),
-				attempt.getCompletionTimeSeconds(),
-				attempt.getAttemptDate()
-			))
-			.collect(Collectors.toList());
-
-		return new TriviaRankingResponse(
-			trivia.getId(),
-			trivia.getTitle(),
-			trivia.getQuestions().size(),
-			rankings
-		);
+		List<TriviaAttemptResponse> rankings = attempts
+				.stream()
+				.map(TriviaAttemptMapper::toDto)
+				.collect(Collectors.toList());
+		return new TriviaRankingResponse(trivia.getId(), trivia.getTitle(), trivia.getQuestions().size(), rankings);
 	}
 
 	private void syncQuestions(Trivia trivia, Set<UpdateQuestionRequest> incomingQuestions) {
-		Map<Long, UpdateQuestionRequest> incomingMap = incomingQuestions.stream()
+		Map<Long, UpdateQuestionRequest> incomingMap = incomingQuestions
+				.stream()
 				.filter(dto -> dto.id() != null)
 				.collect(Collectors.toMap(UpdateQuestionRequest::id, Function.identity()));
-		trivia.getQuestions().removeIf(existingQuestion ->
-				!incomingMap.containsKey(existingQuestion.getId()));
+		trivia.getQuestions().removeIf(existingQuestion -> !incomingMap.containsKey(existingQuestion.getId()));
 		for (UpdateQuestionRequest dto : incomingQuestions) {
 			if (dto.id() == null) {
 				Question newQuestion = TriviaMapper.createQuestionFromDto(dto);
 				trivia.addQuestion(newQuestion);
 			} else {
-				trivia.getQuestions().stream()
+				trivia.getQuestions()
+						.stream()
 						.filter(q -> q.getId().equals(dto.id()))
 						.findFirst()
-						.ifPresent(existingQuestion ->
-								TriviaMapper.updateQuestionFromDto(existingQuestion, dto)
-						);
+						.ifPresent(existingQuestion -> TriviaMapper.updateQuestionFromDto(existingQuestion, dto));
 			}
 		}
 	}

@@ -7,6 +7,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class PlayerMapper {
 
+	private PlayerMapper() {}
+
 	public static UpdatedPlayerResponse toDto(Player player, boolean passwordUpdated) {
 		return new UpdatedPlayerResponse(player.getUsername(), player.getEmail(), passwordUpdated);
 	}
