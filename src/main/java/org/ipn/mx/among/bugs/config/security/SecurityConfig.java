@@ -65,16 +65,28 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public CorsConfigurationSource corsConfigSource() {
-		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOriginPatterns(List.of("http://localhost:4200", "http://127.0.0.1:4200"));
-		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept-Language"));
-		config.setAllowCredentials(true);
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", config);
-		return source;
-	}
+    public CorsConfigurationSource corsConfigSource() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        String allowedOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
+
+        if (allowedOrigins != null) {
+            config.setAllowedOriginPatterns(List.of(allowedOrigins.split(",")));
+        } else {
+            // fallback local
+            config.setAllowedOriginPatterns(
+                    List.of("http://localhost:4200", "http://127.0.0.1:4200")
+            );
+        }
+
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept-Language"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 
 	@Bean
 	public FilterRegistrationBean<CorsFilter> filterRegistrationBean() {
