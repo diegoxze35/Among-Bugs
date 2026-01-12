@@ -19,10 +19,10 @@ public interface TriviaAttemptRepository extends JpaRepository<TriviaAttempt, Lo
 	List<TriviaAttempt> findTopAttemptsByTriviaId(@Param("triviaId") Long triviaId);
 
 	@Query(value = """
-				SELECT ta FROM trivia_attempts ta
-				WHERE ta.player_id = :player_id AND ta.trivia_id = :trivia_id
-				ORDER BY ta.correct_answers DESC, ta.completion_time_seconds
-				FETCH FIRST 1 ROW ONLY
+				SELECT * FROM trivia_attempts ta
+    			WHERE ta.player_id = :player_id AND ta.trivia_id = :trivia_id
+                ORDER BY ta.correct_answers DESC, ta.completion_time_seconds
+                FETCH FIRST 1 ROW ONLY;
 			""",
 			nativeQuery = true
 	)
